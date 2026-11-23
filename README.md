@@ -41,7 +41,7 @@ npm run build    # salida en dist/
 
 Importar el repositorio en Vercel. `vercel.json` ya fija el preset Vite, `npm run build` y la carpeta `dist`. No hace falta configurar variables de entorno.
 
-URL de previsualización: _pendiente; se completa con el dominio de producción de Vercel (apartado Domains)._
+URL de previsualización: **https://feria-salvaje-argentina.vercel.app**
 
 ## Perfiles de demo
 
