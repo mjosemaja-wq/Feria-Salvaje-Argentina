@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bordo: #6B1E2E;
+  --color-bordo-claro: #8E3446;
+  --color-papel: #F4EDE1;
+  --color-papel-oscuro: #E8DECB;
+  --color-vina: #3F5A3A;
+  --color-ocre: #C98B2B;
+  --color-tinta: #2B2520;
+  --color-tinta-suave: #5C524A;
+  --font-titulo: "Fraunces", Georgia, serif;
+  --font-texto: "Work Sans", system-ui, sans-serif;
+}
+
+@layer base {
+  html { background: var(--color-papel); color: var(--color-tinta); }
+  body {
+    font-family: var(--font-texto);
+    min-height: 100vh;
+    /* Papel crudo: una veta sutil, sin imágenes externas. */
+    background-image:
+      radial-gradient(circle at 12% 8%, rgb(107 30 46 / 0.06) 0 120px, transparent 121px),
+      radial-gradient(circle at 92% 30%, rgb(201 139 43 / 0.07) 0 90px, transparent 91px),
+      radial-gradient(circle at 30% 95%, rgb(63 90 58 / 0.06) 0 140px, transparent 141px);
+    background-attachment: fixed;
+  }
+  h1, h2, h3 { font-family: var(--font-titulo); letter-spacing: -0.01em; }
+  :focus-visible { outline: 3px solid var(--color-ocre); outline-offset: 2px; border-radius: 4px; }
+  button, input, select, textarea { font: inherit; }
+}
+
+@layer components {
+  .etiqueta {
+    background: #FBF7F0;
+    border: 1.5px solid var(--color-tinta);
+    border-radius: 6px;
+    box-shadow: 3px 3px 0 rgb(43 37 32 / 0.85);
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+    min-height: 44px; padding: .55rem 1rem; border-radius: 999px;
+    border: 1.5px solid var(--color-tinta); font-weight: 600; cursor: pointer;
+    transition: transform .08s ease, background .15s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primario { background: var(--color-bordo); color: #fff; border-color: var(--color-bordo); }
+  .btn-primario:hover:not(:disabled) { background: var(--color-bordo-claro); }
+  .btn-secundario { background: transparent; color: var(--color-tinta); }
+  .btn-secundario:hover:not(:disabled) { background: var(--color-papel-oscuro); }
+  .campo {
+    width: 100%; min-height: 44px; padding: .5rem .75rem; border-radius: 6px;
+    border: 1.5px solid var(--color-tinta-suave); background: #fff;
+  }
+  .campo[aria-invalid="true"] { border-color: #B3261E; background: #FFF6F5; }
+  .tiza { font-family: var(--font-titulo); font-weight: 800; }
+}
