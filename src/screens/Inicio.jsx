@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { ROLES, ACTORES } from '../domain/constants.js'
+import { ROLES, ACTORES, PROVINCIAS, actorProductor } from '../domain/constants.js'
 import { BODEGA_DEMO } from '../domain/seed.js'
-import { guardarPerfil, useDominio } from '../store.js'
+import { nuevoId } from '../domain/util.js'
+import { guardarPerfil, useDominio, despachar } from '../store.js'
 import { Aviso, ir } from '../ui.jsx'
 
-const RUTA_INICIAL = { productor: 'mi-postulacion', organizacion: 'mesas', revisor: 'propuestas', auditor: 'conciliacion' }
+const RUTA_INICIAL = { productor: 'mi-postulacion', organizacion: 'bandeja', revisor: 'propuestas', auditor: 'conciliacion' }
+const NUEVA = '__nueva__'
 
 export default function Inicio() {
   const state = useDominio()
@@ -13,8 +15,22 @@ export default function Inicio() {
   const [bodegaId, setBodegaId] = useState(BODEGA_DEMO)
   const [actorId, setActorId] = useState({ organizacion: ACTORES.organizacion[0].id, revisor: ACTORES.revisor[0].id, auditor: ACTORES.auditor[0].id })
 
+  const [nueva, setNueva] = useState({ nombre: '', provincia: 'Mendoza', localidad: '' })
+  const [error, setError] = useState(null)
+
   function entrar(e) {
     e.preventDefault()
+    if (rol === 'productor' && bodegaId === NUEVA) {
+      // Bodega nueva: se crea junto con su borrador en la edición abierta.
+      const conv = state.entities.convocatorias.find((c) => !c.cerrada)
+      if (!conv) return setError('No hay ninguna edición abierta para postularse.')
+      const id = nuevoId('bod')
+      const postId = nuevoId('pos')
+      const r = despachar({ id: nuevoId('cmd'), tipo: 'POST_CREAR', actor: actorProductor({ id, nombre: nueva.nombre }), datos: { postulacionId: postId, convocatoriaId: conv.id, bodega: { id, ...nueva } } })
+      if (!r.ok) return setError(r.error.message)
+      guardarPerfil({ rol, bodegaId: id })
+      return ir(`postular/${postId}`)
+    }
     const perfil = rol === 'productor' ? { rol, bodegaId } : { rol, actorId: actorId[rol] }
     guardarPerfil(perfil)
     ir(RUTA_INICIAL[rol])
@@ -55,13 +71,29 @@ export default function Inicio() {
           <label className="block">
             <span className="font-semibold">Tu bodega</span>
             <select className="campo mt-1" value={bodegaId} onChange={(e) => setBodegaId(e.target.value)}>
+              <option value={NUEVA}>➕ Soy una bodega nueva</option>
               {bodegas.map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.nombre} · {b.localidad}, {b.provincia}
                 </option>
               ))}
             </select>
-            <span className="mt-1 block text-sm text-tinta-suave">La primera es la bodega familiar de Lavalle del escenario: tiene un pedido de cambios esperando.</span>
+            <span className="mt-1 block text-sm text-tinta-suave">La Tranquera Nativa es la bodega familiar de Lavalle del escenario: tiene un pedido de cambios esperando.</span>
+            {bodegaId === NUEVA && (
+              <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                <label className="text-sm">Nombre de la bodega
+                  <input className="campo mt-1" required value={nueva.nombre} onChange={(e) => setNueva({ ...nueva, nombre: e.target.value })} />
+                </label>
+                <label className="text-sm">Provincia
+                  <select className="campo mt-1" value={nueva.provincia} onChange={(e) => setNueva({ ...nueva, provincia: e.target.value })}>
+                    {PROVINCIAS.map((p) => <option key={p}>{p}</option>)}
+                  </select>
+                </label>
+                <label className="text-sm">Localidad
+                  <input className="campo mt-1" value={nueva.localidad} onChange={(e) => setNueva({ ...nueva, localidad: e.target.value })} />
+                </label>
+              </div>
+            )}
           </label>
         ) : (
           <label className="block">
@@ -75,6 +107,7 @@ export default function Inicio() {
           </label>
         )}
 
+        {error && <Aviso tono="error" titulo={error} />}
         <button type="submit" className="btn btn-primario w-full sm:w-auto">Entrar</button>
       </form>
     </div>
