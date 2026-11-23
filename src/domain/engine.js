@@ -478,6 +478,7 @@ const HANDLERS = {
       efectos.push({ tipo: 'espera_salida', orden: post.ordenEspera })
       post.ordenEspera = null
     }
+    if (ctx.cmd.actor.rol === 'organizacion') comentar(ctx, post, motivo, 'baja')
     cambiarEstado(ctx, post, E.BAJA, { efectos, motivo })
     const promovida = promoverPrimera(ctx, conv)
     return { estado: E.BAJA, promovida }
