@@ -4,7 +4,25 @@ Portal donde las bodegas chicas se postulan para tener mesa en una feria anual d
 
 Demo de una sola sesión con **datos sintéticos guardados en `localStorage`**. No hay base de datos, ni Supabase, ni servicios externos de cobro, mensajería, mapas o IA. Los perfiles se eligen en la pantalla inicial y **no son autenticación**.
 
-Estado actual: **Fase 1 de 4** (ver [PLAN.md](PLAN.md)).
+Estado actual: **fases 1 a 4 completas** (ver [PLAN.md](PLAN.md)).
+
+## Pantallas
+
+| Perfil | Pantallas |
+| --- | --- |
+| Productor | **Mi postulación** (estado con su color, mesa o lugar en la espera, comentarios, historia con fecha y autor, baja) · **Postulación en 4 pasos** (bodega y viñedo · etiquetas · prácticas · revisión y envío; corrección en «Requiere cambios») |
+| Organización | **Bandeja** con filtros (edición, estado, provincia, búsqueda, solo con pendientes) · **Ficha de revisión** con checklist automático y manual, aprobar, pedir cambios, rechazar, baja, acreditación y propuestas de corrección · **Mesas** (pizarra, lista de espera, ofrecer mesas libres) · **Convocatoria** (cupo, fechas, valor, requisitos versionados) |
+| Revisor | **Propuestas y cierres**: comparación por campo (valor al proponer, vigente y propuesto), recursos afectados, revisión esperada, desactualización, decisión y cierres idempotentes |
+| Auditor | **Conciliación** (eventos contra registros, detalle con filtros, indicadores, CSV, historial de ajustes, evidencia de no duplicación) · **Historial** de comandos y eventos con CSV. Solo lectura. |
+| Todos | **Diagnóstico**: pruebas de dominio en el navegador, exportar e importar copia (con migración v1 → v2), simular fallo de guardado, restaurar datos de ejemplo |
+
+## Cómo reproducir los casos del briefing con los datos de ejemplo
+
+- **Escenario de la bodega de Mendoza**: entrá como Productor «La Tranquera Nativa» → *Corregir y reenviar* → paso 2, cargá la cosecha de «Cal y Canto» → paso 4 → *Reenviar*. Después, como Organización → Bandeja → La Tranquera Nativa → *Tomar para revisión* → *Aprobar*: sale con la mesa 39.
+- **Caso de aceptación de mesas**: con 38 ocupadas, aprobá tres bodegas «En revisión» que cumplan todo (por ejemplo La Tranquera después de reenviar, Bodega Callejón Angosto y Chacra Los Álamos): quedan las mesas 39 y 40 y la tercera entra a la lista de espera en la posición 4. Dá de baja cualquier aprobada desde su ficha: la primera de la lista toma su mesa y la tercera pasa a la posición 3.
+- **Requisito por convocatoria**: Convocatoria → Edición 2027 → *Modificar* sulfitos (por ejemplo, tope 40) con «Cambio obligatorio» tildado. Las aprobadas de 2027 quedan «Para revisar» con su mesa; la Edición 2026 no cambia.
+- **Fecha de cierre**: cambiá el cierre de la Edición 2027 a una fecha pasada; el formulario de un borrador avisa y no deja enviar.
+- **Fallo de guardado**: Diagnóstico → *Simular fallo en el próximo guardado* → editá y guardá un borrador: lo escrito queda, el estado no cambia, y el reintento guarda una sola operación.
 
 ## Stack
 
@@ -23,6 +41,8 @@ npm run build    # salida en dist/
 
 Importar el repositorio en Vercel. `vercel.json` ya fija el preset Vite, `npm run build` y la carpeta `dist`. No hace falta configurar variables de entorno.
 
+URL de previsualización: _pendiente; se completa con el dominio de producción de Vercel (apartado Domains)._
+
 ## Perfiles de demo
 
 | Perfil | Qué hace |
@@ -34,7 +54,11 @@ Importar el repositorio en Vercel. `vercel.json` ya fija el preset Vite, `npm ru
 
 Los permisos se aplican en el motor (`src/domain/engine.js`, tabla `PERMISOS`), no solo ocultando botones. Aun así son de demostración: cualquiera con acceso al navegador puede editar `localStorage`.
 
-El perfil elegido se guarda en la clave `feriaSalvaje.portal.perfil`. Para cambiarlo, usá **Cambiar perfil** en el encabezado, o borrá esa clave desde las herramientas del navegador.
+### Cómo cambiar la clave del panel
+
+No hay contraseña: el «acceso» a cada panel es el perfil local elegido en la pantalla inicial, guardado en la clave `feriaSalvaje.portal.perfil`. Para cambiar de panel usá **Cambiar perfil** en el encabezado, o borrá esa clave desde las herramientas del navegador (Application → Local Storage).
+
+Los nombres de las claves están en `src/domain/constants.js` (`PERFIL_KEY` y `STORAGE_KEY`). Si los cambiás, la app arranca con una clave nueva y carga la semilla otra vez. Las personas de prueba de cada perfil están en `ACTORES`, en el mismo archivo.
 
 ## Datos y persistencia
 
